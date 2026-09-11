@@ -1,0 +1,3738 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>LIAISON v1.7.0 Supabase</title>
+
+<style>
+:root{
+  --bg:#f5f6f8;
+  --panel:#fff;
+  --text:#182033;
+  --muted:#747d8e;
+  --line:#e7e9ee;
+  --accent:#3457d5;
+  --accent-soft:#eef2ff;
+
+  --a:#c9504b;
+  --a-soft:#fff0ee;
+
+  --b:#4f74b8;
+  --b-soft:#eef4ff;
+
+  --c:#b58120;
+  --c-soft:#fff6dc;
+
+  --d:#3f8874;
+  --d-soft:#edf8f4;
+
+  --invest:#785bb4;
+  --invest-soft:#f4efff;
+
+  --ok:#347967;
+  --ok-soft:#edf8f4;
+
+  --shadow:0 12px 34px rgba(22,32,51,.08);
+}
+
+*{box-sizing:border-box}
+
+html,body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+}
+
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;
+  line-height:1.55;
+}
+
+button,input,textarea,select{font:inherit}
+button{cursor:pointer;color:inherit}
+
+.app{
+  max-width:980px;
+  margin:auto;
+  min-height:100vh;
+  padding-bottom:104px;
+}
+
+.header{
+  position:sticky;
+  top:0;
+  z-index:20;
+  padding:15px 18px 13px;
+  background:rgba(245,246,248,.94);
+  backdrop-filter:blur(18px);
+  border-bottom:1px solid rgba(231,233,238,.9);
+}
+
+.header-inner{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+}
+
+.header-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.brand{
+  font-size:18px;
+  font-weight:850;
+  letter-spacing:.08em;
+}
+
+.version{
+  margin-top:2px;
+  color:var(--muted);
+  font-size:11px;
+}
+
+.connection{
+  display:inline-flex;
+  padding:5px 9px;
+  border-radius:999px;
+  background:#f0f1f4;
+  color:var(--muted);
+  font-size:10px;
+}
+
+.connection.online{
+  background:var(--ok-soft);
+  color:var(--ok);
+}
+
+.connection.error{
+  background:var(--a-soft);
+  color:var(--a);
+}
+
+main{padding:22px 18px}
+
+.screen{display:none}
+.screen.active{display:block}
+
+.page-head{margin-bottom:20px}
+
+.page-title{
+  margin:0;
+  font-size:27px;
+  font-weight:850;
+}
+
+.page-sub{
+  margin-top:4px;
+  color:var(--muted);
+  font-size:13px;
+}
+
+.panel{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:18px;
+}
+
+.section{margin:25px 0}
+
+.section-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:10px;
+}
+
+.section-title h2{
+  margin:0;
+  font-size:16px;
+}
+
+.small{
+  color:var(--muted);
+  font-size:12px;
+}
+
+.scope-row,
+.switch-row,
+.quick-row{
+  display:flex;
+  gap:8px;
+  overflow:auto;
+  scrollbar-width:none;
+}
+
+.scope-row::-webkit-scrollbar,
+.switch-row::-webkit-scrollbar,
+.quick-row::-webkit-scrollbar{
+  display:none;
+}
+
+.chip{
+  flex:0 0 auto;
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:8px 13px;
+  background:#fff;
+  white-space:nowrap;
+  font-size:13px;
+}
+
+.chip.active{
+  color:#fff;
+  background:var(--text);
+  border-color:var(--text);
+}
+
+.matrix{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  margin-top:15px;
+}
+
+.quad{
+  min-height:126px;
+  padding:15px;
+  border:1px solid transparent;
+  border-radius:17px;
+  text-align:left;
+}
+
+.quad.a{background:var(--a-soft);color:var(--a)}
+.quad.b{background:var(--b-soft);color:var(--b)}
+.quad.c{background:var(--c-soft);color:var(--c)}
+.quad.d{background:var(--d-soft);color:var(--d)}
+
+.quad.selected{
+  box-shadow:0 0 0 2px currentColor inset;
+}
+
+.quad-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.quad-letter,
+.quad-count{
+  font-size:21px;
+  font-weight:850;
+}
+
+.quad-label{
+  margin:4px 0 10px;
+  font-size:12px;
+  font-weight:750;
+}
+
+.quad-preview{
+  color:var(--text);
+  font-size:12px;
+  line-height:1.45;
+  opacity:.82;
+}
+
+.list{overflow:hidden}
+
+.item-row{
+  width:100%;
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+  padding:15px 16px;
+  border:0;
+  border-bottom:1px solid var(--line);
+  background:#fff;
+  text-align:left;
+}
+
+.item-row:last-child{border-bottom:0}
+.item-row:hover{background:#fafbfc}
+
+.item-main{
+  flex:1;
+  min-width:0;
+}
+
+.item-title{
+  display:block;
+  font-size:15px;
+  font-weight:750;
+}
+
+.item-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+  margin-top:4px;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.dot{
+  width:9px;
+  height:9px;
+  flex:0 0 auto;
+  margin-top:7px;
+  border-radius:50%;
+  background:#aab0bb;
+}
+
+.dot.A{background:var(--a)}
+.dot.B{background:var(--b)}
+.dot.C{background:var(--c)}
+.dot.D{background:var(--d)}
+
+.badge{
+  display:inline-flex;
+  align-items:center;
+  border-radius:999px;
+  padding:2px 7px;
+  background:#f1f3f6;
+  color:#667085;
+  font-size:11px;
+}
+
+.badge.fixed{
+  background:#edf2ff;
+  color:#405ca9;
+}
+
+.badge.repeat{
+  background:#eaf7f3;
+  color:#347967;
+}
+
+.badge.invest{
+  background:var(--invest-soft);
+  color:var(--invest);
+}
+
+.summary-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+
+.summary{padding:17px}
+
+.summary-label{
+  margin-bottom:8px;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.summary-main{
+  font-size:17px;
+  font-weight:800;
+}
+
+.summary-sub{
+  margin-top:5px;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.alert{
+  margin:8px 0;
+  padding:13px 15px;
+  border-radius:14px;
+  background:var(--a-soft);
+  color:#8f3e39;
+  font-size:13px;
+}
+
+.alert.protect{
+  background:var(--b-soft);
+  color:#385d9f;
+}
+
+.timeline{overflow:hidden}
+
+.timeline-row{
+  display:grid;
+  grid-template-columns:62px 1fr;
+  gap:10px;
+  padding:14px 16px;
+  border-bottom:1px solid var(--line);
+}
+
+.timeline-row:last-child{border-bottom:0}
+
+.timeline-time{
+  padding-top:2px;
+  color:var(--muted);
+  font-size:13px;
+}
+
+.timeline-title{font-weight:750}
+
+.relation-line{
+  margin-top:7px;
+  padding-left:12px;
+  border-left:2px solid #d9dee8;
+  color:#596274;
+  font-size:13px;
+}
+
+.weekbar{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:6px;
+}
+
+.daybtn{
+  padding:9px 3px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:#fff;
+  text-align:center;
+}
+
+.daybtn .dow{
+  color:var(--muted);
+  font-size:10px;
+}
+
+.daybtn .num{
+  margin-top:2px;
+  font-weight:800;
+}
+
+.daybtn .mark{
+  height:5px;
+  margin-top:4px;
+  color:var(--accent);
+  font-size:9px;
+}
+
+.daybtn.selected{
+  color:#fff;
+  background:var(--text);
+  border-color:var(--text);
+}
+
+.daybtn.selected .dow{color:#d8dce5}
+
+.calendar-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin:18px 0 10px;
+}
+
+.calendar-head strong{font-size:18px}
+
+.cal-week{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  margin-bottom:5px;
+  color:var(--muted);
+  font-size:11px;
+  text-align:center;
+}
+
+.calendar{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:5px;
+}
+
+.cal-day{
+  min-height:78px;
+  padding:7px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:#fff;
+  text-align:left;
+}
+
+.cal-day.muted{opacity:.28}
+
+.cal-day.selected{
+  box-shadow:0 0 0 2px var(--accent) inset;
+}
+
+.cal-day.today{background:#fafbff}
+
+.cal-num{
+  font-size:12px;
+  font-weight:750;
+}
+
+.cal-dots{
+  display:flex;
+  flex-wrap:wrap;
+  gap:3px;
+  margin-top:9px;
+}
+
+.cal-dot{
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:#aaa;
+}
+
+.cal-dot.A{background:var(--a)}
+.cal-dot.B{background:var(--b)}
+.cal-dot.C{background:var(--c)}
+.cal-dot.D{background:var(--d)}
+.cal-dot.fixed{background:#2f4c9d}
+.cal-dot.invest{background:var(--invest)}
+
+.consult-box{padding:21px}
+
+.consult-box h2{
+  margin:0 0 5px;
+  font-size:20px;
+}
+
+.context-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+  margin:18px 0;
+}
+
+.context-box{
+  padding:12px;
+  border-radius:13px;
+  background:#f7f8fa;
+}
+
+.context-box strong{
+  display:block;
+  font-size:20px;
+}
+
+.review-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:9px;
+}
+
+.metric{padding:16px}
+
+.metric strong{
+  display:block;
+  font-size:23px;
+}
+
+.metric span{
+  color:var(--muted);
+  font-size:11px;
+}
+
+textarea,input,select{
+  width:100%;
+  padding:11px 12px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  outline:none;
+  background:#fff;
+  color:var(--text);
+}
+
+textarea:focus,
+input:focus,
+select:focus{
+  border-color:#9aace7;
+  box-shadow:0 0 0 3px #eef2ff;
+}
+
+textarea{
+  min-height:110px;
+  resize:vertical;
+}
+
+.field{margin-bottom:13px}
+
+.field label{
+  display:block;
+  margin:0 0 5px 2px;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.form-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+
+.primary,.secondary{
+  border-radius:12px;
+  padding:11px 15px;
+  font-weight:750;
+}
+
+.primary{
+  border:0;
+  background:var(--accent);
+  color:#fff;
+}
+
+.secondary{
+  border:1px solid var(--line);
+  background:#fff;
+}
+
+.danger{color:var(--a)}
+
+.actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:18px;
+}
+
+.add-choice{
+  display:block;
+  width:100%;
+  padding:18px;
+  border:1px solid var(--line);
+  border-radius:17px;
+  background:#fff;
+  text-align:left;
+}
+
+.add-choice-title{
+  font-size:17px;
+  font-weight:800;
+}
+
+.add-choice-sub{
+  margin-top:4px;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.add-kind-display{
+  padding:12px 14px;
+  margin-bottom:14px;
+  background:#f7f8fa;
+}
+
+.nav{
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:30;
+  padding-bottom:env(safe-area-inset-bottom);
+  border-top:1px solid var(--line);
+  background:rgba(255,255,255,.96);
+  backdrop-filter:blur(18px);
+}
+
+.nav-inner{
+  max-width:980px;
+  margin:auto;
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+}
+
+.nav-btn{
+  padding:10px 3px 9px;
+  border:0;
+  background:transparent;
+  color:#818897;
+  font-size:11px;
+}
+
+.nav-btn.active{
+  color:var(--accent);
+  font-weight:800;
+}
+
+.nav-icon{
+  display:block;
+  height:24px;
+  font-size:18px;
+}
+
+.fab{
+  position:fixed;
+  right:max(18px,calc((100vw - 980px)/2 + 18px));
+  bottom:82px;
+  z-index:25;
+  width:52px;
+  height:52px;
+  border:0;
+  border-radius:50%;
+  background:var(--text);
+  color:#fff;
+  box-shadow:var(--shadow);
+  font-size:26px;
+}
+
+.overlay{
+  position:fixed;
+  inset:0;
+  z-index:100;
+  display:none;
+  align-items:flex-end;
+  justify-content:center;
+  background:rgba(20,26,38,.4);
+}
+
+.overlay.show{display:flex}
+
+.sheet{
+  width:min(680px,100%);
+  max-height:89vh;
+  overflow:auto;
+  padding:22px 20px calc(22px + env(safe-area-inset-bottom));
+  border-radius:24px 24px 0 0;
+  background:#fff;
+  box-shadow:0 -20px 60px rgba(0,0,0,.14);
+}
+
+.sheet-handle{
+  width:38px;
+  height:4px;
+  margin:-9px auto 17px;
+  border-radius:999px;
+  background:#d9dde5;
+}
+
+.sheet h2{margin:0 0 18px}
+
+.detail-title{
+  font-size:23px;
+  font-weight:850;
+}
+
+.detail-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin:10px 0 20px;
+}
+
+.detail-row{
+  display:grid;
+  grid-template-columns:100px 1fr;
+  gap:12px;
+  padding:11px 0;
+  border-bottom:1px solid var(--line);
+  font-size:14px;
+}
+
+.detail-row label{color:var(--muted)}
+
+.empty{
+  padding:30px 20px;
+  color:var(--muted);
+  font-size:13px;
+  text-align:center;
+}
+
+.toast{
+  position:fixed;
+  left:50%;
+  bottom:87px;
+  z-index:200;
+  display:none;
+  align-items:center;
+  gap:14px;
+  max-width:calc(100vw - 30px);
+  padding:11px 13px 11px 16px;
+  border-radius:14px;
+  background:#202737;
+  color:#fff;
+  box-shadow:var(--shadow);
+  transform:translateX(-50%);
+}
+
+.toast.show{display:flex}
+
+.toast button{
+  border:0;
+  background:transparent;
+  color:#aebfff;
+  font-weight:800;
+}
+
+.package-text{min-height:330px}
+.hidden{display:none!important}
+
+.auth-gate{
+  position:fixed;
+  inset:0;
+  z-index:500;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:#f5f6f8;
+}
+
+.auth-card{
+  width:min(430px,100%);
+  padding:25px;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:22px;
+  box-shadow:var(--shadow);
+}
+
+.auth-card h1{
+  margin:0;
+  font-size:25px;
+}
+
+.auth-card p{
+  color:var(--muted);
+  font-size:13px;
+}
+
+.auth-message{
+  min-height:22px;
+  margin-top:10px;
+  color:var(--a);
+  font-size:12px;
+}
+
+.loading{
+  opacity:.6;
+  pointer-events:none;
+}
+
+@media(max-width:720px){
+  .matrix{grid-template-columns:repeat(2,1fr)}
+  .summary-grid{grid-template-columns:1fr}
+  .context-grid,.review-grid{grid-template-columns:repeat(2,1fr)}
+  .form-grid{grid-template-columns:1fr}
+  .cal-day{min-height:61px;padding:6px}
+  .header-actions .secondary{display:none}
+}
+</style>
+</head>
+
+<body>
+
+<div class="auth-gate" id="authGate">
+  <div class="auth-card">
+    <h1>LIAISON</h1>
+    <p>あなたのLIAISONデータへ接続します。</p>
+
+    <div class="field">
+      <label>メールアドレス</label>
+      <input id="authEmail" type="email" autocomplete="username">
+    </div>
+
+    <div class="field">
+      <label>パスワード</label>
+      <input id="authPassword" type="password" autocomplete="current-password">
+    </div>
+
+    <button class="primary" id="signInBtn">ログイン</button>
+    <div class="auth-message" id="authMessage"></div>
+  </div>
+</div>
+
+
+<div class="app" id="appRoot">
+
+<header class="header">
+  <div class="header-inner">
+    <div>
+      <div class="brand">LIAISON</div>
+      <div class="version">v1.7.0 · Supabase</div>
+    </div>
+
+    <div class="header-actions">
+      <span class="connection" id="connectionState">未接続</span>
+      <button class="secondary" id="headerConsult">相談</button>
+      <button class="secondary" id="logoutBtn">ログアウト</button>
+    </div>
+  </div>
+</header>
+
+
+<main>
+
+<section class="screen active" id="screen-priority">
+  <div class="page-head">
+    <h1 class="page-title">優先度</h1>
+    <div class="page-sub">全体の現在地</div>
+  </div>
+
+  <div class="scope-row" id="scopeRow">
+    <button class="chip active" data-scope="all">すべて</button>
+    <button class="chip" data-scope="today">今日</button>
+    <button class="chip" data-scope="week">今週</button>
+    <button class="chip" data-scope="month">今月</button>
+  </div>
+
+  <div class="matrix" id="priorityMatrix"></div>
+
+  <div class="section">
+    <div class="section-title">
+      <h2 id="priorityListTitle">動いていること</h2>
+      <span class="small" id="priorityListCount"></span>
+    </div>
+    <div class="panel list" id="priorityList"></div>
+  </div>
+
+  <div class="section" id="unclassifiedSection">
+    <div class="section-title">
+      <h2>まだ分類していないもの</h2>
+      <span class="small">必要ならLIAISONが整理</span>
+    </div>
+    <div class="panel list" id="unclassifiedList"></div>
+  </div>
+</section>
+
+
+<section class="screen" id="screen-today">
+  <div class="page-head">
+    <h1 class="page-title" id="todayTitle"></h1>
+    <div class="page-sub">今日の現在地</div>
+  </div>
+
+  <div class="summary-grid">
+    <div class="panel summary">
+      <div class="summary-label">今日の最重要</div>
+      <div class="summary-main" id="todayTop">—</div>
+      <div class="summary-sub" id="todayTopSub"></div>
+    </div>
+
+    <div class="panel summary">
+      <div class="summary-label">固定予定</div>
+      <div class="summary-main" id="todayFixed">—</div>
+      <div class="summary-sub" id="todayFixedSub"></div>
+    </div>
+
+    <div class="panel summary">
+      <div class="summary-label">自分への投資</div>
+      <div class="summary-main" id="todayInvest">—</div>
+      <div class="summary-sub" id="todayInvestSub"></div>
+    </div>
+  </div>
+
+  <div class="section" id="attentionSection">
+    <div class="section-title"><h2>注意</h2></div>
+    <div id="todayAlerts"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">
+      <h2>今日の流れ</h2>
+      <span class="small">必要なものだけ</span>
+    </div>
+    <div class="panel timeline" id="todayTimeline"></div>
+  </div>
+
+  <button class="secondary" id="consultToday">今日全体をLIAISONに相談</button>
+</section>
+
+
+<section class="screen" id="screen-schedule">
+  <div class="page-head">
+    <h1 class="page-title">予定</h1>
+    <div class="page-sub">固定予定と少し先の見通し</div>
+  </div>
+
+  <div class="switch-row">
+    <button class="chip active" data-schedule-mode="week">週</button>
+    <button class="chip" data-schedule-mode="month">月</button>
+  </div>
+
+  <div id="weekView">
+    <div class="section">
+      <div class="weekbar" id="weekbar"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <h2 id="selectedDateTitle"></h2>
+      </div>
+      <div class="panel timeline" id="selectedTimeline"></div>
+    </div>
+
+    <button class="secondary" id="consultSelectedDate">この日をLIAISONに相談</button>
+  </div>
+
+  <div id="monthView" class="hidden">
+    <div class="calendar-head">
+      <button class="secondary" id="prevMonth">‹</button>
+      <strong id="monthTitle"></strong>
+      <button class="secondary" id="nextMonth">›</button>
+    </div>
+
+    <div class="cal-week">
+      <div>月</div><div>火</div><div>水</div>
+      <div>木</div><div>金</div><div>土</div><div>日</div>
+    </div>
+
+    <div class="calendar" id="calendar"></div>
+
+    <div class="section">
+      <div class="section-title">
+        <h2 id="monthSelectedTitle"></h2>
+      </div>
+      <div class="panel list" id="monthSelectedList"></div>
+    </div>
+  </div>
+</section>
+
+
+<section class="screen" id="screen-consult">
+  <div class="page-head">
+    <h1 class="page-title">相談</h1>
+    <div class="page-sub">現在地をLIAISONへ渡す</div>
+  </div>
+
+  <div class="panel consult-box">
+    <h2>そのまま話してください</h2>
+
+    <div class="small">
+      必要な現在地だけをアプリ側で整理して相談文を作ります。
+    </div>
+
+    <div class="context-grid" id="contextGrid"></div>
+
+    <div class="quick-row">
+      <button class="chip consultQuick">今日どうする？</button>
+      <button class="chip consultQuick">明日を整理</button>
+      <button class="chip consultQuick">今週を整理</button>
+      <button class="chip consultQuick">何を先に始める？</button>
+      <button class="chip consultQuick">投資時間を考える</button>
+    </div>
+
+    <div style="margin-top:14px">
+      <textarea id="consultInput"
+        placeholder="例：明日、筋トレ30分入れるならどこがよさそう？"></textarea>
+    </div>
+
+    <div class="actions">
+      <button class="primary" id="generateGeneralConsult">相談文を作る</button>
+      <button class="secondary" id="consultSave">メモ保存</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">
+      <h2>今、関連する情報</h2>
+      <span class="small">JIT</span>
+    </div>
+    <div class="panel list" id="jitList"></div>
+  </div>
+</section>
+
+
+<section class="screen" id="screen-review">
+  <div class="page-head">
+    <h1 class="page-title">振り返り</h1>
+    <div class="page-sub">評価ではなく、次を少し楽にする</div>
+  </div>
+
+  <div class="calendar-head">
+    <button class="secondary" id="prevReviewMonth">‹</button>
+    <strong id="reviewMonthTitle"></strong>
+    <button class="secondary" id="nextReviewMonth">›</button>
+  </div>
+
+  <div class="review-grid">
+    <div class="panel metric">
+      <strong id="metricImportant">0</strong>
+      <span>重要案件完了</span>
+    </div>
+
+    <div class="panel metric">
+      <strong id="metricCompleted">0</strong>
+      <span>完了</span>
+    </div>
+
+    <div class="panel metric">
+      <strong id="metricInvest">0h</strong>
+      <span>投資時間</span>
+    </div>
+
+    <div class="panel metric">
+      <strong id="metricRepeat">0</strong>
+      <span>繰り返し予定</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><h2>今月できたこと</h2></div>
+    <div class="panel list" id="reviewDone"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><h2>次に先に守ること</h2></div>
+    <div class="panel list" id="reviewProtect"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><h2>小さなKAIZEN</h2></div>
+
+    <textarea id="kaizenInput"
+      placeholder="一つだけ。例：確認待ち案件は開始目安を早めに見る"></textarea>
+
+    <div class="actions">
+      <button class="secondary" id="saveKaizen">保存</button>
+      <button class="primary" id="exportReport">月間HTMLを出力</button>
+    </div>
+  </div>
+</section>
+
+</main>
+</div>
+
+
+<button class="fab" id="fab">＋</button>
+
+
+<nav class="nav">
+  <div class="nav-inner">
+    <button class="nav-btn active" data-screen="priority">
+      <span class="nav-icon">◫</span>優先度
+    </button>
+
+    <button class="nav-btn" data-screen="today">
+      <span class="nav-icon">●</span>今日
+    </button>
+
+    <button class="nav-btn" data-screen="schedule">
+      <span class="nav-icon">□</span>予定
+    </button>
+
+    <button class="nav-btn" data-screen="consult">
+      <span class="nav-icon">◌</span>相談
+    </button>
+
+    <button class="nav-btn" data-screen="review">
+      <span class="nav-icon">↺</span>振り返り
+    </button>
+  </div>
+</nav>
+
+
+<div class="overlay" id="detailOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div id="detailContent"></div>
+  </div>
+</div>
+
+
+<div class="overlay" id="addTypeOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h2>追加</h2>
+
+    <div style="display:grid;gap:10px">
+      <button class="add-choice" id="addEventChoice">
+        <div class="add-choice-title">📅 予定を追加</div>
+        <div class="add-choice-sub">固定予定・毎週・隔週・毎月など</div>
+      </button>
+
+      <button class="add-choice" id="addCaseChoice">
+        <div class="add-choice-title">✓ 案件・やることを追加</div>
+        <div class="add-choice-sub">期限や進めたいこと</div>
+      </button>
+
+      <button class="add-choice" id="addTalkChoice">
+        <div class="add-choice-title">◌ LIAISONに話して追加</div>
+        <div class="add-choice-sub">自然な言葉から整理する</div>
+      </button>
+    </div>
+
+    <div class="actions">
+      <button class="secondary" data-close="addTypeOverlay">閉じる</button>
+    </div>
+  </div>
+</div>
+
+
+<div class="overlay" id="addOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h2>追加</h2>
+
+    <form id="addForm">
+      <div id="addKindDisplay" class="panel add-kind-display"></div>
+
+      <div class="field">
+        <label>内容</label>
+        <input id="addTitle" required placeholder="自然な言葉で">
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label>日付</label>
+          <input id="addDate" type="date">
+        </div>
+
+        <div class="field">
+          <label>時刻</label>
+          <input id="addTime" type="time">
+        </div>
+      </div>
+
+      <div id="addEventFields" class="hidden">
+        <div class="field">
+          <label>繰り返し</label>
+          <select id="addRepeat">
+            <option value="none">なし</option>
+            <option value="daily">毎日</option>
+            <option value="weekly">毎週</option>
+            <option value="biweekly">隔週</option>
+            <option value="monthly">毎月</option>
+          </select>
+          <div class="small" id="addRepeatHelp" style="margin-top:5px"></div>
+        </div>
+
+        <div class="field">
+          <label>繰り返し終了日（任意）</label>
+          <input id="addRepeatUntil" type="date">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>期限</label>
+        <input id="addDue" type="date">
+      </div>
+
+      <div class="field">
+        <label>メモ</label>
+        <textarea id="addMemo"></textarea>
+      </div>
+
+      <div class="actions">
+        <button class="primary" type="submit">保存</button>
+        <button class="secondary" type="button" id="talkToAdd">LIAISONに相談</button>
+        <button class="secondary" type="button" data-close="addOverlay">閉じる</button>
+      </div>
+
+      <div class="small" style="margin-top:12px">
+        優先度は追加時には入力しません。
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<div class="overlay" id="editOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h2>修正</h2>
+
+    <form id="editForm">
+      <input type="hidden" id="editId">
+
+      <div class="field">
+        <label>内容</label>
+        <input id="editTitle" required>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label>種類</label>
+          <select id="editKind">
+            <option value="case">案件・やること</option>
+            <option value="event">予定</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>優先度</label>
+          <select id="editPriority">
+            <option value="">未分類</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>状態</label>
+        <select id="editStatus">
+          <option value="active">進行中</option>
+          <option value="completed">完了</option>
+        </select>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label>日付</label>
+          <input id="editDate" type="date">
+        </div>
+
+        <div class="field">
+          <label>時刻</label>
+          <input id="editTime" type="time">
+        </div>
+      </div>
+
+      <div id="editEventFields" class="hidden">
+        <div class="field">
+          <label>繰り返し</label>
+          <select id="editRepeat">
+            <option value="none">なし</option>
+            <option value="daily">毎日</option>
+            <option value="weekly">毎週</option>
+            <option value="biweekly">隔週</option>
+            <option value="monthly">毎月</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>繰り返し終了日</label>
+          <input id="editRepeatUntil" type="date">
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label>期限</label>
+          <input id="editDue" type="date">
+        </div>
+
+        <div class="field">
+          <label>開始目安</label>
+          <input id="editStartBy" type="date">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>メモ</label>
+        <textarea id="editMemo"></textarea>
+      </div>
+
+      <div class="actions">
+        <button class="primary" type="submit">保存</button>
+        <button class="secondary" type="button" data-close="editOverlay">閉じる</button>
+      </div>
+
+      <div class="small" id="editRepeatNotice" style="margin-top:12px"></div>
+    </form>
+  </div>
+</div>
+
+
+<div class="overlay" id="liaisonPackageOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h2>LIAISONに相談</h2>
+
+    <textarea id="liaisonPackageText" class="package-text"></textarea>
+
+    <div class="actions">
+      <button class="primary" id="copyLiaisonPackage">相談文をコピー</button>
+      <button class="secondary" id="openChatGPT">LIAISONを開く</button>
+      <button class="secondary" data-close="liaisonPackageOverlay">閉じる</button>
+    </div>
+  </div>
+</div>
+
+
+<div class="toast" id="toast">
+  <span id="toastText"></span>
+  <button id="toastUndo">元に戻す</button>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+(() => {
+"use strict";
+
+/* =========================================================
+   SUPABASE
+========================================================= */
+
+const SUPABASE_URL =
+  "https://klwymzdasmhqeizvimxc.supabase.co";
+
+/*
+  ↓ここだけ、さっきコピーした sb_publishable_... に置き換える
+*/
+const SUPABASE_PUBLISHABLE_KEY =
+  "sb_publishable_upcEmxdSSeHtxNqb8K-keg_jTI5c4R7";
+
+
+const $=id=>document.getElementById(id);
+
+const TODAY=localDate(new Date());
+
+let db=null;
+let currentUser=null;
+let busy=false;
+
+let pendingAddKind="case";
+let priorityFilter=null;
+let scope="all";
+let scheduleMode="week";
+let selectedDate=TODAY;
+let calendarMonth=startOfMonth(TODAY);
+let reviewMonth=startOfMonth(TODAY);
+
+let undoAction=null;
+let toastTimer=null;
+
+let state={
+  items:[],
+  relations:[],
+  kaizen:{},
+  consult_note:"",
+  settings:{}
+};
+
+
+/* =========================================================
+   DATE
+========================================================= */
+
+function pad(n){
+  return String(n).padStart(2,"0");
+}
+
+function localDate(d){
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+
+function parseDate(str){
+  if(!str)return null;
+  const [y,m,d]=str.split("-").map(Number);
+  return new Date(y,m-1,d);
+}
+
+function addDays(str,n){
+  const d=parseDate(str);
+  d.setDate(d.getDate()+n);
+  return localDate(d);
+}
+
+function startOfMonth(str){
+  const d=parseDate(str);
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-01`;
+}
+
+function changeMonth(str,n){
+  const d=parseDate(str);
+  d.setDate(1);
+  d.setMonth(d.getMonth()+n);
+  return localDate(d);
+}
+
+function monthKey(str){
+  return str.slice(0,7);
+}
+
+function mondayOf(str){
+  const d=parseDate(str);
+  const offset=(d.getDay()+6)%7;
+  d.setDate(d.getDate()-offset);
+  return localDate(d);
+}
+
+function sundayOf(str){
+  return addDays(mondayOf(str),6);
+}
+
+function fmtDate(str){
+  if(!str)return "—";
+  const d=parseDate(str);
+  const dow=["日","月","火","水","木","金","土"][d.getDay()];
+  return `${d.getMonth()+1}/${d.getDate()}（${dow}）`;
+}
+
+function fmtLong(str){
+  if(!str)return "—";
+  const d=parseDate(str);
+  const dow=["日","月","火","水","木","金","土"][d.getDay()];
+  return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${dow}）`;
+}
+
+function clone(v){
+  return JSON.parse(JSON.stringify(v));
+}
+
+function esc(v=""){
+  return String(v)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+
+/* =========================================================
+   UI STATUS
+========================================================= */
+
+function setConnection(text,mode=""){
+  const el=$("connectionState");
+  el.textContent=text;
+  el.classList.remove("online","error");
+  if(mode)el.classList.add(mode);
+}
+
+function setBusy(value){
+  busy=value;
+  $("appRoot").classList.toggle("loading",value);
+}
+
+function friendlyError(error){
+  const m=error?.message||String(error||"");
+
+  if(m.includes("VERSION_CONFLICT")){
+    return "別の場所で更新されています。最新状態を読み直します。";
+  }
+
+  if(m.includes("AUTH_REQUIRED")){
+    return "ログインが必要です。";
+  }
+
+  if(m.includes("ITEM_NOT_FOUND")){
+    return "対象が見つかりません。";
+  }
+
+  return m||"処理に失敗しました。";
+}
+
+
+/* =========================================================
+   DB MAPPING
+========================================================= */
+
+function fromDbItem(x){
+  return {
+    ...x,
+    time:x.scheduled_time
+      ? String(x.scheduled_time).slice(0,5)
+      : null
+  };
+}
+
+function fromDbRelation(x){
+  return {
+    ...x,
+    type:x.relation_type
+  };
+}
+
+function itemPatchFromApp(x){
+  return {
+    title:x.title,
+    type:x.type,
+    status:x.status,
+    priority:x.priority||null,
+    priority_source:x.priority_source||null,
+    scheduled_date:x.scheduled_date||null,
+    due_date:x.due_date||null,
+    start_by:x.start_by||null,
+    fixed_date:x.fixed_date||null,
+    scheduled_time:x.time||null,
+    is_fixed:!!x.is_fixed,
+    recurrence:x.recurrence||null,
+    investment:!!x.investment,
+    investment_type:x.investment_type||null,
+    investment_minutes:x.investment_minutes??null,
+    rhythm:x.rhythm||null,
+    certainty:x.certainty||"confirmed",
+    memo:x.memo||"",
+    completed_at:x.completed_at||null
+  };
+}
+
+
+/* =========================================================
+   AUTH
+========================================================= */
+
+async function signIn(){
+  if(!db||busy)return;
+
+  const email=$("authEmail").value.trim();
+  const password=$("authPassword").value;
+
+  if(!email||!password){
+    $("authMessage").textContent=
+      "メールアドレスとパスワードを入力してください。";
+    return;
+  }
+
+  $("authMessage").textContent="接続中…";
+
+  const {data,error}=await db.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if(error){
+    $("authMessage").textContent=
+      "ログインできませんでした。入力内容を確認してください。";
+    return;
+  }
+
+  currentUser=data.user;
+  $("authPassword").value="";
+  $("authGate").classList.add("hidden");
+
+  await loadRemoteState();
+}
+
+async function signOut(){
+  if(!db)return;
+
+  await db.auth.signOut();
+
+  currentUser=null;
+
+  state={
+    items:[],
+    relations:[],
+    kaizen:{},
+    consult_note:"",
+    settings:{}
+  };
+
+  renderAll();
+
+  setConnection("未接続");
+
+  $("authGate").classList.remove("hidden");
+}
+
+
+/* =========================================================
+   READ DB
+========================================================= */
+
+async function loadRemoteState(){
+  if(!db||!currentUser)return;
+
+  setBusy(true);
+  setConnection("同期中");
+
+  try{
+    const [itemResult,relationResult,appStateResult]=
+      await Promise.all([
+        db
+          .from("items")
+          .select("*")
+          .is("deleted_at",null)
+          .order("created_at",{ascending:true}),
+
+        db
+          .from("relations")
+          .select("*")
+          .order("created_at",{ascending:true}),
+
+        db
+          .from("app_state")
+          .select("*")
+          .eq("user_id",currentUser.id)
+          .maybeSingle()
+      ]);
+
+    if(itemResult.error)throw itemResult.error;
+    if(relationResult.error)throw relationResult.error;
+    if(appStateResult.error)throw appStateResult.error;
+
+    state.items=(itemResult.data||[]).map(fromDbItem);
+
+    const ids=new Set(state.items.map(x=>x.id));
+
+    state.relations=(relationResult.data||[])
+      .filter(x=>ids.has(x.from_id)&&ids.has(x.to_id))
+      .map(fromDbRelation);
+
+    const appState=appStateResult.data;
+
+    state.kaizen=appState?.kaizen||{};
+    state.consult_note=appState?.consult_note||"";
+    state.settings=appState?.settings||{};
+
+    setConnection("DB接続済み","online");
+
+    renderAll();
+  }
+  catch(error){
+    console.error(error);
+    setConnection("接続エラー","error");
+    showToast(friendlyError(error));
+  }
+  finally{
+    setBusy(false);
+  }
+}
+
+async function saveAppState(){
+  if(!currentUser)return;
+
+  const {error}=await db
+    .from("app_state")
+    .upsert({
+      user_id:currentUser.id,
+      kaizen:state.kaizen,
+      consult_note:state.consult_note,
+      settings:state.settings
+    },{
+      onConflict:"user_id"
+    });
+
+  if(error)throw error;
+}
+
+
+/* =========================================================
+   RPC
+========================================================= */
+
+function rpcRow(data){
+  return Array.isArray(data)
+    ? data[0]||null
+    : data||null;
+}
+
+async function rpcCreateItem(payload){
+  const {data,error}=await db.rpc(
+    "liaison_create_item",
+    {p_payload:payload}
+  );
+
+  if(error)throw error;
+  return rpcRow(data);
+}
+
+async function rpcPatchItem(id,version,patch,action="update"){
+  const {data,error}=await db.rpc(
+    "liaison_patch_item",
+    {
+      p_item_id:id,
+      p_expected_version:version,
+      p_patch:patch,
+      p_action:action
+    }
+  );
+
+  if(error)throw error;
+  return rpcRow(data);
+}
+
+async function rpcDeleteItem(id,version){
+  const {data,error}=await db.rpc(
+    "liaison_soft_delete_item",
+    {
+      p_item_id:id,
+      p_expected_version:version
+    }
+  );
+
+  if(error)throw error;
+  return rpcRow(data);
+}
+
+async function rpcRestoreItem(id,version){
+  const {data,error}=await db.rpc(
+    "liaison_restore_item",
+    {
+      p_item_id:id,
+      p_expected_version:version
+    }
+  );
+
+  if(error)throw error;
+  return rpcRow(data);
+}
+
+
+/* =========================================================
+   DATA
+========================================================= */
+
+function getItem(id){
+  return state.items.find(x=>x.id===id);
+}
+
+function activeItems(){
+  return state.items.filter(x=>!x.deleted_at);
+}
+
+function actionItems(){
+  return activeItems().filter(x=>
+    ["case","event"].includes(x.type)
+  );
+}
+
+function priorityItems(){
+  return actionItems().filter(x=>
+    x.status==="active"&&x.priority
+  );
+}
+
+
+/* =========================================================
+   RECURRENCE
+========================================================= */
+
+function recurrenceLabel(x){
+  if(!x.recurrence)return "";
+
+  return {
+    daily:"毎日",
+    weekly:"毎週",
+    biweekly:"隔週",
+    monthly:"毎月"
+  }[x.recurrence.frequency]||"";
+}
+
+function occursOn(x,date){
+  if(!x||x.deleted_at||x.status!=="active")return false;
+
+  const start=x.scheduled_date;
+
+  if(!start)return false;
+
+  if(!x.recurrence)return start===date;
+
+  if(date<start)return false;
+
+  const r=x.recurrence;
+
+  if(r.until&&date>r.until)return false;
+
+  const startDate=parseDate(start);
+  const target=parseDate(date);
+
+  const days=Math.round((target-startDate)/86400000);
+  const interval=Math.max(1,Number(r.interval)||1);
+
+  switch(r.frequency){
+    case "daily":
+      return days>=0&&days%interval===0;
+
+    case "weekly":
+      return days>=0&&days%(7*interval)===0;
+
+    case "biweekly":
+      return days>=0&&days%14===0;
+
+    case "monthly":{
+      const months=
+        (target.getFullYear()-startDate.getFullYear())*12+
+        target.getMonth()-startDate.getMonth();
+
+      return months>=0 &&
+        months%interval===0 &&
+        target.getDate()===startDate.getDate();
+    }
+  }
+
+  return false;
+}
+
+function itemsOn(date){
+  return actionItems()
+    .filter(x=>occursOn(x,date))
+    .sort((a,b)=>
+      String(a.time||"99:99")
+        .localeCompare(String(b.time||"99:99"))
+    );
+}
+
+function validateRecurrence(date,frequency,until){
+  if(frequency==="none")return null;
+
+  if(!date){
+    return "繰り返し予定には開始日が必要です。";
+  }
+
+  if(until&&until<date){
+    return "繰り返し終了日は開始日以降にしてください。";
+  }
+
+  return null;
+}
+
+
+/* =========================================================
+   RELATIONS
+========================================================= */
+
+function relatedActionsFor(id){
+  return state.relations
+    .filter(r=>r.to_id===id&&r.type==="after")
+    .map(r=>getItem(r.from_id))
+    .filter(Boolean);
+}
+
+function relatedInfoFor(id){
+  return state.relations
+    .filter(r=>r.to_id===id&&r.type==="related_info")
+    .map(r=>getItem(r.from_id))
+    .filter(Boolean);
+}
+
+
+/* =========================================================
+   ROWS
+========================================================= */
+
+function badges(x){
+  let s="";
+
+  if(x.priority){
+    s+=`<span class="badge">優先度 ${x.priority}</span>`;
+  }
+
+  if(x.is_fixed){
+    s+=`<span class="badge fixed">固定</span>`;
+  }
+
+  if(x.recurrence){
+    s+=`<span class="badge repeat">${recurrenceLabel(x)}</span>`;
+  }
+
+  if(x.investment){
+    s+=`<span class="badge invest">投資</span>`;
+  }
+
+  return s;
+}
+
+function rowHTML(x,date=null){
+  return `
+  <button class="item-row"
+    data-open="${x.id}"
+    data-occurrence="${date||""}">
+
+    <span class="dot ${x.priority||""}"></span>
+
+    <span class="item-main">
+      <span class="item-title">${esc(x.title)}</span>
+
+      <span class="item-meta">
+        ${x.time?`<span>${esc(x.time)}</span>`:""}
+
+        ${
+          date
+            ? `<span>${fmtDate(date)}</span>`
+            : x.scheduled_date
+              ? `<span>${fmtDate(x.scheduled_date)}</span>`
+              : ""
+        }
+
+        ${badges(x)}
+      </span>
+    </span>
+  </button>`;
+}
+
+function bindOpeners(root=document){
+  root.querySelectorAll("[data-open]").forEach(el=>{
+    el.onclick=()=>{
+      openDetail(
+        el.dataset.open,
+        el.dataset.occurrence||null
+      );
+    };
+  });
+}
+
+
+/* =========================================================
+   PRIORITY
+========================================================= */
+
+function priorityRank(p){
+  return {A:1,B:2,C:3,D:4}[p]||9;
+}
+
+function matchesScope(x){
+  if(scope==="all")return true;
+
+  if(!x.scheduled_date)return false;
+
+  if(scope==="today"){
+    return occursOn(x,TODAY);
+  }
+
+  if(scope==="week"){
+    const start=mondayOf(TODAY);
+    const end=sundayOf(TODAY);
+
+    if(x.recurrence){
+      for(let d=start;d<=end;d=addDays(d,1)){
+        if(occursOn(x,d))return true;
+      }
+      return false;
+    }
+
+    return x.scheduled_date>=start&&x.scheduled_date<=end;
+  }
+
+  if(scope==="month"){
+    const first=startOfMonth(TODAY);
+    const next=changeMonth(first,1);
+
+    if(x.recurrence){
+      for(let d=first;d<next;d=addDays(d,1)){
+        if(occursOn(x,d))return true;
+      }
+      return false;
+    }
+
+    return monthKey(x.scheduled_date)===monthKey(TODAY);
+  }
+
+  return true;
+}
+
+function renderPriority(){
+  const all=priorityItems().filter(matchesScope);
+
+  const labels={
+    A:"今やる",
+    B:"先に守る",
+    C:"短く処理",
+    D:"減らす候補"
+  };
+
+  $("scopeRow")
+    .querySelectorAll("[data-scope]")
+    .forEach(btn=>{
+      btn.classList.toggle(
+        "active",
+        btn.dataset.scope===scope
+      );
+    });
+
+  $("priorityMatrix").innerHTML=
+    ["A","B","C","D"].map(p=>{
+      const arr=all.filter(x=>x.priority===p);
+
+      return `
+      <button
+        class="quad ${p.toLowerCase()} ${priorityFilter===p?"selected":""}"
+        data-priority="${p}">
+
+        <div class="quad-top">
+          <span class="quad-letter">${p}</span>
+          <span class="quad-count">${arr.length}</span>
+        </div>
+
+        <div class="quad-label">${labels[p]}</div>
+
+        <div class="quad-preview">
+          ${
+            arr.slice(0,2)
+              .map(x=>esc(x.title))
+              .join("<br>")||"—"
+          }
+        </div>
+      </button>`;
+    }).join("");
+
+  $("priorityMatrix")
+    .querySelectorAll("[data-priority]")
+    .forEach(btn=>{
+      btn.onclick=()=>{
+        priorityFilter=
+          priorityFilter===btn.dataset.priority
+            ? null
+            : btn.dataset.priority;
+
+        renderPriority();
+      };
+    });
+
+  let arr=[...all];
+
+  if(priorityFilter){
+    arr=arr.filter(x=>x.priority===priorityFilter);
+  }
+
+  arr.sort(
+    (a,b)=>priorityRank(a.priority)-priorityRank(b.priority)
+  );
+
+  const scopeNames={
+    all:"",
+    today:"今日の",
+    week:"今週の",
+    month:"今月の"
+  };
+
+  $("priorityListTitle").textContent=
+    priorityFilter
+      ? `${scopeNames[scope]}${priorityFilter} の案件`
+      : `${scopeNames[scope]}動いていること`;
+
+  $("priorityListCount").textContent=`${arr.length}件`;
+
+  $("priorityList").innerHTML=
+    arr.length
+      ? arr.map(x=>rowHTML(x)).join("")
+      : `<div class="empty">今、表示するものはありません。</div>`;
+
+  bindOpeners($("priorityList"));
+
+  const unclassified=actionItems().filter(x=>
+    x.type==="case" &&
+    x.status==="active" &&
+    !x.priority &&
+    matchesScope(x)
+  );
+
+  $("unclassifiedList").innerHTML=
+    unclassified.length
+      ? unclassified.map(x=>rowHTML(x)).join("")
+      : `<div class="empty">未分類の案件はありません。</div>`;
+
+  bindOpeners($("unclassifiedList"));
+
+  $("unclassifiedSection").classList.toggle(
+    "hidden",
+    !unclassified.length
+  );
+}
+
+
+/* =========================================================
+   TIMELINE
+========================================================= */
+
+function renderTimeline(root,date){
+  const arr=itemsOn(date);
+
+  if(!arr.length){
+    root.innerHTML=
+      `<div class="empty">この日の予定はありません。</div>`;
+    return;
+  }
+
+  root.innerHTML=arr.map(x=>{
+    const related=relatedActionsFor(x.id);
+
+    return `
+    <div class="timeline-row">
+      <div class="timeline-time">${esc(x.time||"未定")}</div>
+
+      <div>
+        <button
+          data-open="${x.id}"
+          data-occurrence="${date}"
+          style="border:0;background:none;padding:0;text-align:left">
+
+          <div class="timeline-title">${esc(x.title)}</div>
+
+          <div class="item-meta">${badges(x)}</div>
+        </button>
+
+        ${
+          related.map(r=>`
+            <div class="relation-line">↳ ${esc(r.title)}</div>
+          `).join("")
+        }
+      </div>
+    </div>`;
+  }).join("");
+
+  bindOpeners(root);
+}
+
+
+/* =========================================================
+   TODAY
+========================================================= */
+
+function renderToday(){
+  $("todayTitle").textContent=fmtLong(TODAY);
+
+  const today=itemsOn(TODAY);
+
+  const top=today
+    .filter(x=>x.priority)
+    .sort((a,b)=>
+      priorityRank(a.priority)-priorityRank(b.priority)
+    )[0];
+
+  $("todayTop").textContent=top?.title||"特になし";
+
+  $("todayTopSub").textContent=
+    top?.due_date
+      ? `期限 ${fmtDate(top.due_date)}`
+      : "";
+
+  const fixed=today.filter(x=>x.is_fixed);
+
+  if(fixed.length){
+    $("todayFixed").textContent=
+      `${fixed[0].time||""} ${fixed[0].title}`.trim();
+
+    $("todayFixedSub").textContent=
+      recurrenceLabel(fixed[0]);
+  }else{
+    $("todayFixed").textContent="特になし";
+    $("todayFixedSub").textContent="";
+  }
+
+  const investment=today.find(x=>x.investment);
+
+  $("todayInvest").textContent=
+    investment
+      ? `${investment.title}${
+          investment.investment_minutes
+            ? " "+investment.investment_minutes+"分"
+            : ""
+        }`
+      : "今日は未設定";
+
+  $("todayInvestSub").textContent=
+    investment
+      ? "今日の具体的な予定"
+      : "";
+
+  const protect=actionItems().filter(x=>
+    x.priority==="B" &&
+    x.start_by &&
+    x.start_by<=addDays(TODAY,3)
+  );
+
+  $("todayAlerts").innerHTML=
+    protect.length
+      ? `<div class="alert protect">
+          ${protect.length}件、先に守りたいBがあります。
+        </div>`
+      : "";
+
+  $("attentionSection").classList.toggle(
+    "hidden",
+    !protect.length
+  );
+
+  renderTimeline($("todayTimeline"),TODAY);
+}
+
+
+/* =========================================================
+   SCHEDULE
+========================================================= */
+
+function renderWeek(){
+  const mon=mondayOf(selectedDate);
+
+  $("weekbar").innerHTML=
+    Array.from({length:7},(_,i)=>{
+      const date=addDays(mon,i);
+      const d=parseDate(date);
+
+      return `
+      <button
+        class="daybtn ${date===selectedDate?"selected":""}"
+        data-date="${date}">
+
+        <div class="dow">
+          ${["月","火","水","木","金","土","日"][i]}
+        </div>
+
+        <div class="num">${d.getDate()}</div>
+
+        <div class="mark">
+          ${itemsOn(date).length?"•":""}
+        </div>
+      </button>`;
+    }).join("");
+
+  $("weekbar")
+    .querySelectorAll("[data-date]")
+    .forEach(btn=>{
+      btn.onclick=()=>{
+        selectedDate=btn.dataset.date;
+        renderWeek();
+      };
+    });
+
+  $("selectedDateTitle").textContent=fmtLong(selectedDate);
+
+  renderTimeline(
+    $("selectedTimeline"),
+    selectedDate
+  );
+}
+
+function renderMonth(){
+  const first=parseDate(calendarMonth);
+  const y=first.getFullYear();
+  const m=first.getMonth();
+
+  $("monthTitle").textContent=`${y}年 ${m+1}月`;
+
+  const offset=(first.getDay()+6)%7;
+  const gridStart=new Date(y,m,1-offset);
+
+  let html="";
+
+  for(let i=0;i<42;i++){
+    const d=new Date(gridStart);
+    d.setDate(gridStart.getDate()+i);
+
+    const date=localDate(d);
+    const arr=itemsOn(date);
+
+    html+=`
+    <button
+      class="cal-day
+        ${d.getMonth()!==m?"muted":""}
+        ${date===selectedDate?"selected":""}
+        ${date===TODAY?"today":""}"
+      data-caldate="${date}">
+
+      <div class="cal-num">${d.getDate()}</div>
+
+      <div class="cal-dots">
+        ${
+          arr.slice(0,5).map(x=>`
+            <span class="cal-dot ${
+              x.is_fixed
+                ? "fixed"
+                : x.investment
+                  ? "invest"
+                  : x.priority||""
+            }"></span>
+          `).join("")
+        }
+      </div>
+    </button>`;
+  }
+
+  $("calendar").innerHTML=html;
+
+  $("calendar")
+    .querySelectorAll("[data-caldate]")
+    .forEach(btn=>{
+      btn.onclick=()=>{
+        selectedDate=btn.dataset.caldate;
+
+        if(
+          selectedDate.slice(0,7)!==
+          calendarMonth.slice(0,7)
+        ){
+          calendarMonth=startOfMonth(selectedDate);
+        }
+
+        renderMonth();
+      };
+    });
+
+  $("monthSelectedTitle").textContent=
+    fmtLong(selectedDate);
+
+  const arr=itemsOn(selectedDate);
+
+  $("monthSelectedList").innerHTML=
+    arr.length
+      ? arr.map(x=>rowHTML(x,selectedDate)).join("")
+      : `<div class="empty">この日の予定はありません。</div>`;
+
+  bindOpeners($("monthSelectedList"));
+}
+
+function renderSchedule(){
+  $("weekView").classList.toggle(
+    "hidden",
+    scheduleMode!=="week"
+  );
+
+  $("monthView").classList.toggle(
+    "hidden",
+    scheduleMode!=="month"
+  );
+
+  if(scheduleMode==="week"){
+    renderWeek();
+  }else{
+    renderMonth();
+  }
+}
+
+
+/* =========================================================
+   CONSULT
+========================================================= */
+
+function buildDateConsultText(date){
+  const arr=itemsOn(date);
+
+  const lines=[
+    "LIAISONに相談",
+    "",
+    "【対象日】",
+    fmtLong(date),
+    "",
+    "【予定・案件】"
+  ];
+
+  if(arr.length){
+    arr.forEach(x=>{
+      lines.push(
+        `・${x.time?x.time+" ":""}${x.title}${
+          x.recurrence
+            ? "［"+recurrenceLabel(x)+"］"
+            : ""
+        }`
+      );
+
+      relatedActionsFor(x.id).forEach(r=>{
+        lines.push(`  ↳ ${r.title}`);
+      });
+    });
+  }else{
+    lines.push("・予定なし");
+  }
+
+  lines.push(
+    "",
+    "【相談】",
+    "この日の予定と重要なことを見て、無理のない流れを整理して。"
+  );
+
+  return lines.join("\n");
+}
+
+function buildItemConsultText(id,date=null){
+  const x=getItem(id);
+
+  const lines=[
+    "LIAISONに相談",
+    "",
+    "【相談対象】",
+    x.title
+  ];
+
+  if(date||x.scheduled_date||x.time){
+    lines.push(
+      "",
+      "【日時】",
+      `${fmtLong(date||x.scheduled_date)}${x.time?" "+x.time:""}`
+    );
+  }
+
+  if(x.recurrence){
+    lines.push(
+      "",
+      "【繰り返し】",
+      recurrenceLabel(x)
+    );
+  }
+
+  if(x.due_date){
+    lines.push(
+      "",
+      "【期限】",
+      fmtLong(x.due_date)
+    );
+  }
+
+  if(x.memo){
+    lines.push(
+      "",
+      "【メモ】",
+      x.memo
+    );
+  }
+
+  relatedActionsFor(id).forEach(r=>{
+    lines.push(
+      "",
+      "【関連行動】",
+      `・${r.title}`
+    );
+
+    relatedInfoFor(r.id).forEach(info=>{
+      lines.push(`・関連情報：${info.title}`);
+    });
+  });
+
+  lines.push(
+    "",
+    "【相談】",
+    x.type==="event"
+      ? "この予定の前後を含めて整理して。"
+      : "次にどう進めるか整理して。"
+  );
+
+  return lines.join("\n");
+}
+
+function openConsultPackage(text){
+  $("liaisonPackageText").value=text;
+  showOverlay("liaisonPackageOverlay");
+}
+
+function targetOccursSoon(target,days=2){
+  for(let i=0;i<=days;i++){
+    if(
+      occursOn(
+        target,
+        addDays(TODAY,i)
+      )
+    ){
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function renderConsult(){
+  $("contextGrid").innerHTML=`
+    <div class="context-box">
+      <strong>${
+        priorityItems()
+          .filter(x=>x.priority==="A")
+          .length
+      }</strong>
+      <span class="small">A</span>
+    </div>
+
+    <div class="context-box">
+      <strong>${itemsOn(TODAY).length}</strong>
+      <span class="small">今日</span>
+    </div>
+
+    <div class="context-box">
+      <strong>${itemsOn(addDays(TODAY,1)).length}</strong>
+      <span class="small">明日</span>
+    </div>
+
+    <div class="context-box">
+      <strong>${
+        activeItems()
+          .filter(x=>x.recurrence)
+          .length
+      }</strong>
+      <span class="small">繰り返し</span>
+    </div>
+  `;
+
+  $("consultInput").value=state.consult_note||"";
+
+  const infos=activeItems().filter(info=>{
+    if(info.type!=="conditional_info")return false;
+
+    const relation=state.relations.find(r=>
+      r.from_id===info.id &&
+      r.type==="related_info"
+    );
+
+    if(!relation)return false;
+
+    const target=getItem(relation.to_id);
+
+    if(!target)return false;
+
+    return targetOccursSoon(target,2);
+  });
+
+  $("jitList").innerHTML=
+    infos.length
+      ? infos.map(x=>rowHTML(x)).join("")
+      : `<div class="empty">
+          今、前に出す必要のある情報はありません。
+        </div>`;
+
+  bindOpeners($("jitList"));
+}
+
+
+/* =========================================================
+   DETAIL
+========================================================= */
+
+function editableItem(x){
+  return ["case","event"].includes(x.type);
+}
+
+function openDetail(id,occurrenceDate=null){
+  const x=getItem(id);
+  if(!x)return;
+
+  const date=occurrenceDate||x.scheduled_date;
+  const editable=editableItem(x);
+
+  $("detailContent").innerHTML=`
+    <div class="detail-title">${esc(x.title)}</div>
+
+    <div class="detail-meta">${badges(x)}</div>
+
+    <div class="detail-row">
+      <label>種類</label>
+      <div>${esc(x.type||"—")}</div>
+    </div>
+
+    <div class="detail-row">
+      <label>日付</label>
+      <div>${date?fmtLong(date):"—"}</div>
+    </div>
+
+    <div class="detail-row">
+      <label>時刻</label>
+      <div>${esc(x.time||"—")}</div>
+    </div>
+
+    ${
+      x.recurrence
+        ? `
+        <div class="detail-row">
+          <label>繰り返し</label>
+          <div>${recurrenceLabel(x)}</div>
+        </div>`
+        : ""
+    }
+
+    <div class="detail-row">
+      <label>期限</label>
+      <div>${x.due_date?fmtLong(x.due_date):"—"}</div>
+    </div>
+
+    <div class="detail-row">
+      <label>メモ</label>
+      <div>${esc(x.memo||"—")}</div>
+    </div>
+
+    <div class="actions">
+      ${
+        editable&&!x.recurrence
+          ? `<button class="primary" id="detailComplete">
+              ${x.status==="completed"?"復元":"✓ 完了"}
+            </button>`
+          : ""
+      }
+
+      ${
+        editable
+          ? `<button class="secondary" id="detailEdit">修正</button>`
+          : ""
+      }
+
+      <button class="secondary" id="detailConsult">
+        LIAISONに相談
+      </button>
+
+      <button class="secondary danger" id="detailDelete">
+        削除
+      </button>
+
+      <button class="secondary" data-close="detailOverlay">
+        閉じる
+      </button>
+    </div>
+
+    ${
+      x.recurrence
+        ? `<div class="small" style="margin-top:12px">
+            現在はシリーズ全体を修正・削除します。
+          </div>`
+        : ""
+    }
+
+    ${
+      !editable
+        ? `<div class="small" style="margin-top:12px">
+            この情報は案件・予定ではないため、ここでは種類変更しません。
+          </div>`
+        : ""
+    }
+  `;
+
+  const complete=$("detailComplete");
+
+  if(complete){
+    complete.onclick=()=>toggleComplete(id);
+  }
+
+  const edit=$("detailEdit");
+
+  if(edit){
+    edit.onclick=()=>openEdit(id);
+  }
+
+  $("detailConsult").onclick=()=>{
+    closeOverlay("detailOverlay");
+
+    openConsultPackage(
+      buildItemConsultText(
+        id,
+        occurrenceDate
+      )
+    );
+  };
+
+  $("detailDelete").onclick=()=>softDelete(id);
+
+  bindClosers();
+  showOverlay("detailOverlay");
+}
+
+
+/* =========================================================
+   COMPLETE
+========================================================= */
+
+async function toggleComplete(id){
+  const x=getItem(id);
+
+  if(!x||!editableItem(x)||busy)return;
+
+  const before=clone(x);
+
+  const patch=
+    x.status==="completed"
+      ? {
+          status:"active",
+          completed_at:null
+        }
+      : {
+          status:"completed",
+          completed_at:new Date().toISOString()
+        };
+
+  try{
+    setBusy(true);
+
+    const updated=await rpcPatchItem(
+      x.id,
+      x.version,
+      patch,
+      "update"
+    );
+
+    closeOverlay("detailOverlay");
+
+    await loadRemoteState();
+
+    showToast(
+      "更新しました",
+      async()=>{
+        try{
+          await rpcPatchItem(
+            before.id,
+            updated.version,
+            {
+              status:before.status,
+              completed_at:before.completed_at
+            },
+            "undo"
+          );
+
+          await loadRemoteState();
+        }
+        catch(error){
+          showToast(friendlyError(error));
+          await loadRemoteState();
+        }
+      }
+    );
+  }
+  catch(error){
+    showToast(friendlyError(error));
+    await loadRemoteState();
+  }
+  finally{
+    setBusy(false);
+  }
+}
+
+
+/* =========================================================
+   DELETE
+========================================================= */
+
+async function softDelete(id){
+  const x=getItem(id);
+
+  if(!x||busy)return;
+
+  try{
+    setBusy(true);
+
+    const deleted=await rpcDeleteItem(
+      x.id,
+      x.version
+    );
+
+    closeOverlay("detailOverlay");
+
+    await loadRemoteState();
+
+    showToast(
+      "削除しました",
+      async()=>{
+        try{
+          await rpcRestoreItem(
+            deleted.id,
+            deleted.version
+          );
+
+          await loadRemoteState();
+        }
+        catch(error){
+          showToast(friendlyError(error));
+          await loadRemoteState();
+        }
+      }
+    );
+  }
+  catch(error){
+    showToast(friendlyError(error));
+    await loadRemoteState();
+  }
+  finally{
+    setBusy(false);
+  }
+}
+
+
+/* =========================================================
+   ADD
+========================================================= */
+
+function openAdd(kind){
+  pendingAddKind=kind;
+
+  $("addForm").reset();
+  $("addDate").value=TODAY;
+  $("addRepeat").value="none";
+
+  const event=kind==="event";
+
+  $("addKindDisplay").innerHTML=
+    event
+      ? `<strong>📅 予定</strong>
+         <div class="small">固定予定・繰り返し予定</div>`
+      : `<strong>✓ 案件・やること</strong>
+         <div class="small">期限や進めたいこと</div>`;
+
+  $("addEventFields").classList.toggle(
+    "hidden",
+    !event
+  );
+
+  updateAddRepeatHelp();
+
+  showOverlay("addOverlay");
+}
+
+function updateAddRepeatHelp(){
+  const date=$("addDate").value;
+  const repeat=$("addRepeat").value;
+
+  if(!date||repeat==="none"){
+    $("addRepeatHelp").textContent="";
+    return;
+  }
+
+  const d=parseDate(date);
+  const dow=["日","月","火","水","木","金","土"][d.getDay()];
+
+  $("addRepeatHelp").textContent={
+    daily:`${fmtDate(date)}から毎日`,
+    weekly:`毎週${dow}曜日`,
+    biweekly:`隔週${dow}曜日`,
+    monthly:`毎月${d.getDate()}日`
+  }[repeat]||"";
+}
+
+async function saveAdd(){
+  if(busy)return;
+
+  const title=$("addTitle").value.trim();
+
+  if(!title)return;
+
+  const repeat=$("addRepeat").value;
+  const date=$("addDate").value||null;
+  const until=$("addRepeatUntil").value||null;
+
+  const validation=
+    pendingAddKind==="event"
+      ? validateRecurrence(
+          date,
+          repeat,
+          until
+        )
+      : null;
+
+  if(validation){
+    alert(validation);
+    return;
+  }
+
+  const recurrence=
+    pendingAddKind==="event" &&
+    repeat!=="none"
+      ? {
+          frequency:repeat,
+          interval:repeat==="biweekly"?2:1,
+          until
+        }
+      : null;
+
+  const payload={
+    type:pendingAddKind,
+    title,
+    status:"active",
+    priority:null,
+    scheduled_date:date,
+    due_date:$("addDue").value||null,
+    start_by:null,
+    scheduled_time:$("addTime").value||null,
+    is_fixed:pendingAddKind==="event",
+    recurrence,
+    investment:false,
+    certainty:"confirmed",
+    memo:$("addMemo").value.trim()
+  };
+
+  try{
+    setBusy(true);
+
+    await rpcCreateItem(payload);
+
+    closeOverlay("addOverlay");
+
+    await loadRemoteState();
+
+    showToast(
+      recurrence
+        ? `${{
+            daily:"毎日",
+            weekly:"毎週",
+            biweekly:"隔週",
+            monthly:"毎月"
+          }[repeat]}の予定を追加しました`
+        : "追加しました"
+    );
+  }
+  catch(error){
+    showToast(friendlyError(error));
+  }
+  finally{
+    setBusy(false);
+  }
+}
+
+
+/* =========================================================
+   EDIT
+========================================================= */
+
+function openEdit(id){
+  const x=getItem(id);
+
+  if(!x||!editableItem(x))return;
+
+  closeOverlay("detailOverlay");
+
+  $("editId").value=id;
+  $("editTitle").value=x.title||"";
+  $("editKind").value=x.type;
+  $("editPriority").value=x.priority||"";
+  $("editStatus").value=x.status||"active";
+  $("editDate").value=x.scheduled_date||"";
+  $("editTime").value=x.time||"";
+  $("editRepeat").value=x.recurrence?.frequency||"none";
+  $("editRepeatUntil").value=x.recurrence?.until||"";
+  $("editDue").value=x.due_date||"";
+  $("editStartBy").value=x.start_by||"";
+  $("editMemo").value=x.memo||"";
+
+  $("editEventFields").classList.toggle(
+    "hidden",
+    x.type!=="event"
+  );
+
+  $("editRepeatNotice").textContent=
+    x.recurrence
+      ? "この変更は繰り返しシリーズ全体に適用します。"
+      : "";
+
+  showOverlay("editOverlay");
+}
+
+async function saveEdit(){
+  if(busy)return;
+
+  const x=getItem($("editId").value);
+
+  if(!x||!editableItem(x))return;
+
+  const before=clone(x);
+
+  const title=$("editTitle").value.trim();
+
+  if(!title)return;
+
+  const kind=$("editKind").value;
+  const repeat=$("editRepeat").value;
+  const date=$("editDate").value||null;
+  const until=$("editRepeatUntil").value||null;
+
+  const validation=
+    kind==="event"
+      ? validateRecurrence(
+          date,
+          repeat,
+          until
+        )
+      : null;
+
+  if(validation){
+    alert(validation);
+    return;
+  }
+
+  const nextStatus=$("editStatus").value;
+
+  const recurrence=
+    kind==="event" &&
+    repeat!=="none"
+      ? {
+          frequency:repeat,
+          interval:repeat==="biweekly"?2:1,
+          until
+        }
+      : null;
+
+  const patch={
+    title,
+    type:kind,
+    priority:$("editPriority").value||null,
+    status:nextStatus,
+    scheduled_date:date,
+    scheduled_time:$("editTime").value||null,
+    due_date:$("editDue").value||null,
+    start_by:$("editStartBy").value||null,
+    memo:$("editMemo").value.trim(),
+    is_fixed:kind==="event",
+    recurrence,
+    completed_at:
+      nextStatus==="completed"
+        ? x.completed_at||new Date().toISOString()
+        : null
+  };
+
+  try{
+    setBusy(true);
+
+    const updated=await rpcPatchItem(
+      x.id,
+      x.version,
+      patch,
+      "update"
+    );
+
+    closeOverlay("editOverlay");
+
+    await loadRemoteState();
+
+    showToast(
+      "修正しました",
+      async()=>{
+        try{
+          await rpcPatchItem(
+            before.id,
+            updated.version,
+            itemPatchFromApp(before),
+            "undo"
+          );
+
+          await loadRemoteState();
+        }
+        catch(error){
+          showToast(friendlyError(error));
+          await loadRemoteState();
+        }
+      }
+    );
+  }
+  catch(error){
+    showToast(friendlyError(error));
+    await loadRemoteState();
+  }
+  finally{
+    setBusy(false);
+  }
+}
+
+
+/* =========================================================
+   REVIEW
+========================================================= */
+
+function renderReview(){
+  const key=monthKey(reviewMonth);
+  const d=parseDate(reviewMonth);
+
+  $("reviewMonthTitle").textContent=
+    `${d.getFullYear()}年 ${d.getMonth()+1}月`;
+
+  const completed=activeItems().filter(x=>
+    x.status==="completed" &&
+    x.completed_at?.slice(0,7)===key
+  );
+
+  $("metricCompleted").textContent=
+    completed.length;
+
+  $("metricImportant").textContent=
+    completed.filter(x=>
+      ["A","B"].includes(x.priority)
+    ).length;
+
+  $("metricInvest").textContent=
+    (
+      completed
+        .filter(x=>x.investment)
+        .reduce(
+          (s,x)=>s+(x.investment_minutes||0),
+          0
+        )/60
+    ).toFixed(1)+"h";
+
+  $("metricRepeat").textContent=
+    activeItems().filter(x=>x.recurrence).length;
+
+  $("reviewDone").innerHTML=
+    completed.length
+      ? completed.map(x=>rowHTML(x)).join("")
+      : `<div class="empty">
+          この月の完了記録はまだありません。
+        </div>`;
+
+  bindOpeners($("reviewDone"));
+
+  const protect=priorityItems()
+    .filter(x=>x.priority==="B");
+
+  $("reviewProtect").innerHTML=
+    protect.length
+      ? protect.map(x=>rowHTML(x)).join("")
+      : `<div class="empty">今のところありません。</div>`;
+
+  bindOpeners($("reviewProtect"));
+
+  $("kaizenInput").value=
+    state.kaizen[key]||"";
+}
+
+
+/* =========================================================
+   MONTH REPORT
+========================================================= */
+
+function exportMonthlyReport(){
+  const key=monthKey(reviewMonth);
+
+  const completed=activeItems().filter(x=>
+    x.status==="completed" &&
+    x.completed_at?.slice(0,7)===key
+  );
+
+  const repeats=activeItems()
+    .filter(x=>x.recurrence);
+
+  const html=`
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${key} LIAISON Report</title>
+<style>
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;
+  max-width:760px;
+  margin:40px auto;
+  padding:0 18px;
+  color:#182033;
+}
+section{
+  border:1px solid #e7e9ee;
+  border-radius:16px;
+  padding:20px;
+  margin:15px 0;
+}
+.meta{
+  color:#747d8e;
+  font-size:12px;
+}
+</style>
+</head>
+<body>
+
+<h1>LIAISON ${key}</h1>
+
+<p class="meta">
+出力日時：${esc(new Date().toLocaleString("ja-JP"))}
+</p>
+
+<section>
+<h2>今月できたこと</h2>
+<ul>
+${
+  completed
+    .map(x=>`<li>${esc(x.title)}</li>`)
+    .join("")
+  ||
+  "<li>記録なし</li>"
+}
+</ul>
+</section>
+
+<section>
+<h2>繰り返し予定</h2>
+<ul>
+${
+  repeats
+    .map(x=>`
+      <li>
+        ${esc(x.title)} —
+        ${recurrenceLabel(x)}
+        ${esc(x.time||"")}
+      </li>
+    `)
+    .join("")
+  ||
+  "<li>なし</li>"
+}
+</ul>
+</section>
+
+<section>
+<h2>KAIZEN</h2>
+<p>${esc(state.kaizen[key]||"記録なし")}</p>
+</section>
+
+</body>
+</html>`;
+
+  const blob=new Blob(
+    [html],
+    {type:"text/html;charset=utf-8"}
+  );
+
+  const url=URL.createObjectURL(blob);
+
+  const a=document.createElement("a");
+
+  a.href=url;
+  a.download=`${key}_LIAISON_Report.html`;
+  a.click();
+
+  setTimeout(
+    ()=>URL.revokeObjectURL(url),
+    1000
+  );
+}
+
+
+/* =========================================================
+   OVERLAY / TOAST
+========================================================= */
+
+function showOverlay(id){
+  $(id).classList.add("show");
+}
+
+function closeOverlay(id){
+  $(id).classList.remove("show");
+}
+
+function bindClosers(){
+  document
+    .querySelectorAll("[data-close]")
+    .forEach(btn=>{
+      btn.onclick=()=>{
+        closeOverlay(btn.dataset.close);
+      };
+    });
+}
+
+function showToast(text,undo=null){
+  clearTimeout(toastTimer);
+
+  undoAction=undo;
+
+  $("toastText").textContent=text;
+
+  $("toastUndo").classList.toggle(
+    "hidden",
+    typeof undo!=="function"
+  );
+
+  $("toast").classList.add("show");
+
+  toastTimer=setTimeout(()=>{
+    $("toast").classList.remove("show");
+    undoAction=null;
+  },5000);
+}
+
+
+/* =========================================================
+   NAV
+========================================================= */
+
+function switchScreen(name){
+  document.querySelectorAll(".screen").forEach(el=>{
+    el.classList.toggle(
+      "active",
+      el.id===`screen-${name}`
+    );
+  });
+
+  document.querySelectorAll(".nav-btn").forEach(btn=>{
+    btn.classList.toggle(
+      "active",
+      btn.dataset.screen===name
+    );
+  });
+
+  if(name==="priority")renderPriority();
+  if(name==="today")renderToday();
+  if(name==="schedule")renderSchedule();
+  if(name==="consult")renderConsult();
+  if(name==="review")renderReview();
+
+  window.scrollTo(0,0);
+}
+
+function renderAll(){
+  renderPriority();
+  renderToday();
+  renderSchedule();
+  renderConsult();
+  renderReview();
+}
+
+
+/* =========================================================
+   EVENTS
+========================================================= */
+
+document.querySelectorAll(".nav-btn").forEach(btn=>{
+  btn.onclick=()=>switchScreen(btn.dataset.screen);
+});
+
+$("headerConsult").onclick=()=>switchScreen("consult");
+
+$("scopeRow")
+  .querySelectorAll("[data-scope]")
+  .forEach(btn=>{
+    btn.onclick=()=>{
+      scope=btn.dataset.scope;
+      priorityFilter=null;
+      renderPriority();
+    };
+  });
+
+$("fab").onclick=()=>{
+  showOverlay("addTypeOverlay");
+};
+
+$("addEventChoice").onclick=()=>{
+  closeOverlay("addTypeOverlay");
+  openAdd("event");
+};
+
+$("addCaseChoice").onclick=()=>{
+  closeOverlay("addTypeOverlay");
+  openAdd("case");
+};
+
+$("addTalkChoice").onclick=()=>{
+  closeOverlay("addTypeOverlay");
+
+  openConsultPackage(
+`LIAISONに追加相談
+
+追加したいこと：
+
+この内容を整理して。
+まだアプリには確定登録しないで。`
+  );
+};
+
+$("addRepeat").onchange=updateAddRepeatHelp;
+$("addDate").onchange=updateAddRepeatHelp;
+
+$("addForm").onsubmit=async e=>{
+  e.preventDefault();
+  await saveAdd();
+};
+
+$("talkToAdd").onclick=()=>{
+  const lines=[
+    $("addTitle").value.trim()
+  ];
+
+  if($("addDate").value){
+    lines.push(
+      `日付：${fmtLong($("addDate").value)}`
+    );
+  }
+
+  if($("addTime").value){
+    lines.push(
+      `時刻：${$("addTime").value}`
+    );
+  }
+
+  if(
+    pendingAddKind==="event" &&
+    $("addRepeat").value!=="none"
+  ){
+    lines.push(
+      `繰り返し：${
+        {
+          daily:"毎日",
+          weekly:"毎週",
+          biweekly:"隔週",
+          monthly:"毎月"
+        }[$("addRepeat").value]
+      }`
+    );
+  }
+
+  lines.push(
+    "",
+    "これをLIAISONとして整理して。まだアプリには確定登録しないで。"
+  );
+
+  closeOverlay("addOverlay");
+
+  openConsultPackage(
+    lines.join("\n")
+  );
+};
+
+$("editKind").onchange=()=>{
+  $("editEventFields").classList.toggle(
+    "hidden",
+    $("editKind").value!=="event"
+  );
+};
+
+$("editForm").onsubmit=async e=>{
+  e.preventDefault();
+  await saveEdit();
+};
+
+document
+  .querySelectorAll("[data-schedule-mode]")
+  .forEach(btn=>{
+    btn.onclick=()=>{
+      scheduleMode=btn.dataset.scheduleMode;
+
+      document
+        .querySelectorAll("[data-schedule-mode]")
+        .forEach(x=>{
+          x.classList.toggle(
+            "active",
+            x===btn
+          );
+        });
+
+      renderSchedule();
+    };
+  });
+
+$("prevMonth").onclick=()=>{
+  calendarMonth=changeMonth(calendarMonth,-1);
+  selectedDate=calendarMonth;
+  renderMonth();
+};
+
+$("nextMonth").onclick=()=>{
+  calendarMonth=changeMonth(calendarMonth,1);
+  selectedDate=calendarMonth;
+  renderMonth();
+};
+
+$("consultToday").onclick=()=>{
+  openConsultPackage(
+    buildDateConsultText(TODAY)
+  );
+};
+
+$("consultSelectedDate").onclick=()=>{
+  openConsultPackage(
+    buildDateConsultText(selectedDate)
+  );
+};
+
+document
+  .querySelectorAll(".consultQuick")
+  .forEach(btn=>{
+    btn.onclick=()=>{
+      $("consultInput").value=
+        btn.textContent.trim();
+    };
+  });
+
+$("generateGeneralConsult").onclick=async()=>{
+  const q=$("consultInput").value.trim();
+
+  state.consult_note=q;
+
+  try{
+    await saveAppState();
+  }
+  catch(error){
+    showToast(friendlyError(error));
+  }
+
+  if(q.includes("明日")){
+    openConsultPackage(
+      buildDateConsultText(
+        addDays(TODAY,1)
+      )
+    );
+  }
+  else if(q.includes("今日")){
+    openConsultPackage(
+      buildDateConsultText(TODAY)
+    );
+  }
+  else{
+    openConsultPackage(
+`LIAISONに相談
+
+【現在の重要案件】
+${
+  priorityItems()
+    .filter(x=>
+      ["A","B"].includes(x.priority)
+    )
+    .map(x=>
+      `・${x.title}［${x.priority}］`
+    )
+    .join("\n")
+}
+
+【相談】
+${q||"今の状況を整理して。"}`
+    );
+  }
+};
+
+$("consultSave").onclick=async()=>{
+  state.consult_note=
+    $("consultInput").value.trim();
+
+  try{
+    await saveAppState();
+
+    showToast(
+      "相談メモを保存しました"
+    );
+  }
+  catch(error){
+    showToast(friendlyError(error));
+  }
+};
+
+$("copyLiaisonPackage").onclick=async()=>{
+  try{
+    await navigator.clipboard.writeText(
+      $("liaisonPackageText").value
+    );
+
+    showToast(
+      "相談文をコピーしました"
+    );
+  }
+  catch(e){
+    $("liaisonPackageText").select();
+  }
+};
+
+$("openChatGPT").onclick=()=>{
+  window.open(
+    "https://chatgpt.com/",
+    "_blank",
+    "noopener,noreferrer"
+  );
+};
+
+$("prevReviewMonth").onclick=()=>{
+  reviewMonth=changeMonth(reviewMonth,-1);
+  renderReview();
+};
+
+$("nextReviewMonth").onclick=()=>{
+  reviewMonth=changeMonth(reviewMonth,1);
+  renderReview();
+};
+
+$("saveKaizen").onclick=async()=>{
+  state.kaizen[
+    monthKey(reviewMonth)
+  ]=$("kaizenInput").value.trim();
+
+  try{
+    await saveAppState();
+
+    showToast(
+      "KAIZENを保存しました"
+    );
+  }
+  catch(error){
+    showToast(friendlyError(error));
+  }
+};
+
+$("exportReport").onclick=exportMonthlyReport;
+
+$("toastUndo").onclick=async()=>{
+  if(typeof undoAction==="function"){
+    const fn=undoAction;
+    undoAction=null;
+
+    $("toast").classList.remove("show");
+
+    await fn();
+  }
+};
+
+document
+  .querySelectorAll(".overlay")
+  .forEach(overlay=>{
+    overlay.onclick=e=>{
+      if(e.target===overlay){
+        overlay.classList.remove("show");
+      }
+    };
+  });
+
+$("signInBtn").onclick=signIn;
+
+$("authPassword").addEventListener(
+  "keydown",
+  e=>{
+    if(e.key==="Enter"){
+      signIn();
+    }
+  }
+);
+
+$("logoutBtn").onclick=signOut;
+
+
+/* =========================================================
+   BOOT
+========================================================= */
+
+async function boot(){
+  bindClosers();
+  renderAll();
+
+  if(
+    !SUPABASE_PUBLISHABLE_KEY ||
+    SUPABASE_PUBLISHABLE_KEY.includes("ここに")
+  ){
+    $("authMessage").textContent=
+      "HTML内の SUPABASE_PUBLISHABLE_KEY を設定してください。";
+
+    setConnection(
+      "設定待ち",
+      "error"
+    );
+
+    return;
+  }
+
+  try{
+    db=window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_PUBLISHABLE_KEY,
+      {
+        auth:{
+          persistSession:true,
+          autoRefreshToken:true,
+          detectSessionInUrl:true
+        }
+      }
+    );
+
+    const {data,error}=await db.auth.getSession();
+
+    if(error)throw error;
+
+    if(data.session?.user){
+      currentUser=data.session.user;
+
+      $("authGate").classList.add("hidden");
+
+      await loadRemoteState();
+    }
+    else{
+      setConnection("ログイン待ち");
+
+      $("authGate").classList.remove("hidden");
+    }
+
+    db.auth.onAuthStateChange(
+      async(event,session)=>{
+        if(event==="SIGNED_OUT"){
+          currentUser=null;
+
+          $("authGate").classList.remove("hidden");
+
+          setConnection("未接続");
+
+          return;
+        }
+
+        if(
+          event==="SIGNED_IN" &&
+          session?.user
+        ){
+          currentUser=session.user;
+
+          $("authGate").classList.add("hidden");
+        }
+      }
+    );
+  }
+  catch(error){
+    console.error(error);
+
+    $("authMessage").textContent=
+      friendlyError(error);
+
+    setConnection(
+      "設定エラー",
+      "error"
+    );
+  }
+}
+
+boot();
+
+})();
+</script>
+
+</body>
+</html>
