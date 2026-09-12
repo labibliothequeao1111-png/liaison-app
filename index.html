@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>LIAISON v1.7.0 Supabase</title>
+<title>LIAISON v1.7.1 Supabase</title>
 
 <style>
 :root{
@@ -32,6 +32,9 @@
 
   --ok:#347967;
   --ok-soft:#edf8f4;
+
+  --life:#627080;
+  --life-soft:#f2f4f7;
 
   --shadow:0 12px 34px rgba(22,32,51,.08);
 }
@@ -288,6 +291,7 @@ main{padding:22px 18px}
 .dot.B{background:var(--b)}
 .dot.C{background:var(--c)}
 .dot.D{background:var(--d)}
+.dot.life{background:var(--life)}
 
 .badge{
   display:inline-flex;
@@ -312,6 +316,11 @@ main{padding:22px 18px}
 .badge.invest{
   background:var(--invest-soft);
   color:var(--invest);
+}
+
+.badge.life{
+  background:var(--life-soft);
+  color:var(--life);
 }
 
 .summary-grid{
@@ -846,7 +855,7 @@ textarea{
   <div class="header-inner">
     <div>
       <div class="brand">LIAISON</div>
-      <div class="version">v1.7.0 · Supabase</div>
+      <div class="version">v1.7.1 · Supabase</div>
     </div>
 
     <div class="header-actions">
@@ -1065,8 +1074,18 @@ textarea{
   </div>
 
   <div class="section">
-    <div class="section-title"><h2>今月できたこと</h2></div>
+    <div class="section-title">
+      <h2>今月できたこと</h2>
+    </div>
     <div class="panel list" id="reviewDone"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">
+      <h2>今月の生活記録</h2>
+      <span class="small" id="reviewLifeCount"></span>
+    </div>
+    <div class="panel list" id="reviewLife"></div>
   </div>
 
   <div class="section">
@@ -1359,9 +1378,6 @@ textarea{
 const SUPABASE_URL =
   "https://klwymzdasmhqeizvimxc.supabase.co";
 
-/*
-  ↓ここだけ、さっきコピーした sb_publishable_... に置き換える
-*/
 const SUPABASE_PUBLISHABLE_KEY =
   "sb_publishable_upcEmxdSSeHtxNqb8K-keg_jTI5c4R7";
 
@@ -1532,6 +1548,7 @@ function itemPatchFromApp(x){
   return {
     title:x.title,
     type:x.type,
+    subtype:x.subtype||null,
     status:x.status,
     priority:x.priority||null,
     priority_source:x.priority_source||null,
@@ -1767,9 +1784,28 @@ function activeItems(){
   return state.items.filter(x=>!x.deleted_at);
 }
 
+function isLifeRecord(x){
+  return x?.subtype==="life_record";
+}
+
+function lifeRecordItems(){
+  return activeItems().filter(x=>isLifeRecord(x));
+}
+
+function lifeRecordDate(x){
+  return (
+    x.scheduled_date ||
+    x.fixed_date ||
+    x.completed_at?.slice(0,10) ||
+    x.created_at?.slice(0,10) ||
+    null
+  );
+}
+
 function actionItems(){
   return activeItems().filter(x=>
-    ["case","event"].includes(x.type)
+    ["case","event"].includes(x.type) &&
+    !isLifeRecord(x)
   );
 }
 
@@ -1797,6 +1833,7 @@ function recurrenceLabel(x){
 
 function occursOn(x,date){
   if(!x||x.deleted_at||x.status!=="active")return false;
+  if(isLifeRecord(x))return false;
 
   const start=x.scheduled_date;
 
@@ -1890,6 +1927,11 @@ function relatedInfoFor(id){
 function badges(x){
   let s="";
 
+  if(isLifeRecord(x)){
+    s+=`<span class="badge life">生活記録</span>`;
+    return s;
+  }
+
   if(x.priority){
     s+=`<span class="badge">優先度 ${x.priority}</span>`;
   }
@@ -1910,12 +1952,16 @@ function badges(x){
 }
 
 function rowHTML(x,date=null){
+  const displayDate=
+    date ||
+    (isLifeRecord(x) ? lifeRecordDate(x) : x.scheduled_date);
+
   return `
   <button class="item-row"
     data-open="${x.id}"
     data-occurrence="${date||""}">
 
-    <span class="dot ${x.priority||""}"></span>
+    <span class="dot ${isLifeRecord(x)?"life":(x.priority||"")}"></span>
 
     <span class="item-main">
       <span class="item-title">${esc(x.title)}</span>
@@ -1924,11 +1970,9 @@ function rowHTML(x,date=null){
         ${x.time?`<span>${esc(x.time)}</span>`:""}
 
         ${
-          date
-            ? `<span>${fmtDate(date)}</span>`
-            : x.scheduled_date
-              ? `<span>${fmtDate(x.scheduled_date)}</span>`
-              : ""
+          displayDate
+            ? `<span>${fmtDate(displayDate)}</span>`
+            : ""
         }
 
         ${badges(x)}
@@ -2419,11 +2463,23 @@ function buildItemConsultText(id,date=null){
     x.title
   ];
 
-  if(date||x.scheduled_date||x.time){
+  if(isLifeRecord(x)){
+    lines.push(
+      "",
+      "【種類】",
+      "生活記録"
+    );
+  }
+
+  const displayDate=
+    date ||
+    (isLifeRecord(x) ? lifeRecordDate(x) : x.scheduled_date);
+
+  if(displayDate||x.time){
     lines.push(
       "",
       "【日時】",
-      `${fmtLong(date||x.scheduled_date)}${x.time?" "+x.time:""}`
+      `${fmtLong(displayDate)}${x.time?" "+x.time:""}`
     );
   }
 
@@ -2466,9 +2522,11 @@ function buildItemConsultText(id,date=null){
   lines.push(
     "",
     "【相談】",
-    x.type==="event"
-      ? "この予定の前後を含めて整理して。"
-      : "次にどう進めるか整理して。"
+    isLifeRecord(x)
+      ? "この生活記録から、今後必要な行動があるかだけ確認して。必要がなければ新しい案件は作らなくてよい。"
+      : x.type==="event"
+        ? "この予定の前後を含めて整理して。"
+        : "次にどう進めるか整理して。"
   );
 
   return lines.join("\n");
@@ -2517,7 +2575,7 @@ function renderConsult(){
 
     <div class="context-box">
       <strong>${
-        activeItems()
+        actionItems()
           .filter(x=>x.recurrence)
           .length
       }</strong>
@@ -2560,14 +2618,30 @@ function renderConsult(){
 ========================================================= */
 
 function editableItem(x){
-  return ["case","event"].includes(x.type);
+  return (
+    ["case","event"].includes(x.type) &&
+    !isLifeRecord(x)
+  );
+}
+
+function itemTypeLabel(x){
+  if(isLifeRecord(x))return "生活記録";
+  if(x.type==="case")return "案件・やること";
+  if(x.type==="event")return "予定";
+  if(x.type==="conditional_info")return "条件付き情報";
+  if(x.type==="resource")return "参考資料";
+  if(x.type==="candidate")return "候補";
+  return x.type||"—";
 }
 
 function openDetail(id,occurrenceDate=null){
   const x=getItem(id);
   if(!x)return;
 
-  const date=occurrenceDate||x.scheduled_date;
+  const date=
+    occurrenceDate ||
+    (isLifeRecord(x) ? lifeRecordDate(x) : x.scheduled_date);
+
   const editable=editableItem(x);
 
   $("detailContent").innerHTML=`
@@ -2577,7 +2651,7 @@ function openDetail(id,occurrenceDate=null){
 
     <div class="detail-row">
       <label>種類</label>
-      <div>${esc(x.type||"—")}</div>
+      <div>${esc(itemTypeLabel(x))}</div>
     </div>
 
     <div class="detail-row">
@@ -2600,10 +2674,15 @@ function openDetail(id,occurrenceDate=null){
         : ""
     }
 
-    <div class="detail-row">
-      <label>期限</label>
-      <div>${x.due_date?fmtLong(x.due_date):"—"}</div>
-    </div>
+    ${
+      !isLifeRecord(x)
+        ? `
+        <div class="detail-row">
+          <label>期限</label>
+          <div>${x.due_date?fmtLong(x.due_date):"—"}</div>
+        </div>`
+        : ""
+    }
 
     <div class="detail-row">
       <label>メモ</label>
@@ -2647,11 +2726,15 @@ function openDetail(id,occurrenceDate=null){
     }
 
     ${
-      !editable
+      isLifeRecord(x)
         ? `<div class="small" style="margin-top:12px">
-            この情報は案件・予定ではないため、ここでは種類変更しません。
+            生活記録は、優先度・今日・予定には混ぜません。
           </div>`
-        : ""
+        : !editable
+          ? `<div class="small" style="margin-top:12px">
+              この情報は案件・予定ではないため、ここでは種類変更しません。
+            </div>`
+          : ""
     }
   `;
 
@@ -3087,10 +3170,38 @@ function renderReview(){
   $("reviewMonthTitle").textContent=
     `${d.getFullYear()}年 ${d.getMonth()+1}月`;
 
+  /*
+    「今月できたこと」
+    = やること・予定として存在していたものの完了。
+    生活記録は混ぜない。
+  */
   const completed=activeItems().filter(x=>
+    !isLifeRecord(x) &&
     x.status==="completed" &&
     x.completed_at?.slice(0,7)===key
   );
+
+  /*
+    「生活記録」
+    = 給油・受診など、すでに起きた事実。
+    優先度判断とは分離する。
+  */
+  const lifeRecords=lifeRecordItems()
+    .filter(x=>{
+      const date=lifeRecordDate(x);
+      return date && monthKey(date)===key;
+    })
+    .sort((a,b)=>{
+      const ad=lifeRecordDate(a)||"";
+      const bd=lifeRecordDate(b)||"";
+
+      if(ad!==bd){
+        return bd.localeCompare(ad);
+      }
+
+      return String(b.time||"")
+        .localeCompare(String(a.time||""));
+    });
 
   $("metricCompleted").textContent=
     completed.length;
@@ -3111,7 +3222,7 @@ function renderReview(){
     ).toFixed(1)+"h";
 
   $("metricRepeat").textContent=
-    activeItems().filter(x=>x.recurrence).length;
+    actionItems().filter(x=>x.recurrence).length;
 
   $("reviewDone").innerHTML=
     completed.length
@@ -3121,6 +3232,18 @@ function renderReview(){
         </div>`;
 
   bindOpeners($("reviewDone"));
+
+  $("reviewLifeCount").textContent=
+    `${lifeRecords.length}件`;
+
+  $("reviewLife").innerHTML=
+    lifeRecords.length
+      ? lifeRecords.map(x=>rowHTML(x)).join("")
+      : `<div class="empty">
+          この月の生活記録はまだありません。
+        </div>`;
+
+  bindOpeners($("reviewLife"));
 
   const protect=priorityItems()
     .filter(x=>x.priority==="B");
@@ -3145,11 +3268,29 @@ function exportMonthlyReport(){
   const key=monthKey(reviewMonth);
 
   const completed=activeItems().filter(x=>
+    !isLifeRecord(x) &&
     x.status==="completed" &&
     x.completed_at?.slice(0,7)===key
   );
 
-  const repeats=activeItems()
+  const lifeRecords=lifeRecordItems()
+    .filter(x=>{
+      const date=lifeRecordDate(x);
+      return date && monthKey(date)===key;
+    })
+    .sort((a,b)=>{
+      const ad=lifeRecordDate(a)||"";
+      const bd=lifeRecordDate(b)||"";
+
+      if(ad!==bd){
+        return ad.localeCompare(bd);
+      }
+
+      return String(a.time||"")
+        .localeCompare(String(b.time||""));
+    });
+
+  const repeats=actionItems()
     .filter(x=>x.recurrence);
 
   const html=`
@@ -3159,6 +3300,7 @@ function exportMonthlyReport(){
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${key} LIAISON Report</title>
+
 <style>
 body{
   font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;
@@ -3167,18 +3309,26 @@ body{
   padding:0 18px;
   color:#182033;
 }
+
 section{
   border:1px solid #e7e9ee;
   border-radius:16px;
   padding:20px;
   margin:15px 0;
 }
+
 .meta{
+  color:#747d8e;
+  font-size:12px;
+}
+
+.record-date{
   color:#747d8e;
   font-size:12px;
 }
 </style>
 </head>
+
 <body>
 
 <h1>LIAISON ${key}</h1>
@@ -3187,8 +3337,10 @@ section{
 出力日時：${esc(new Date().toLocaleString("ja-JP"))}
 </p>
 
+
 <section>
 <h2>今月できたこと</h2>
+
 <ul>
 ${
   completed
@@ -3200,8 +3352,37 @@ ${
 </ul>
 </section>
 
+
+<section>
+<h2>生活記録</h2>
+
+<ul>
+${
+  lifeRecords
+    .map(x=>{
+      const date=lifeRecordDate(x);
+
+      return `
+      <li>
+        ${
+          date
+            ? `<span class="record-date">${esc(fmtDate(date))}</span> `
+            : ""
+        }
+        ${esc(x.title)}
+      </li>`;
+    })
+    .join("")
+  ||
+  "<li>記録なし</li>"
+}
+</ul>
+</section>
+
+
 <section>
 <h2>繰り返し予定</h2>
+
 <ul>
 ${
   repeats
@@ -3219,10 +3400,13 @@ ${
 </ul>
 </section>
 
+
 <section>
 <h2>KAIZEN</h2>
+
 <p>${esc(state.kaizen[key]||"記録なし")}</p>
 </section>
+
 
 </body>
 </html>`;
